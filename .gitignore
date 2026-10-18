@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.venv/
+# 本机解释器路径覆盖
+python-path.txt
+# 生成的 3D 资产与构建产物
+assets/gen/
+unity/Library/
+unity/Temp/
+unity/Obj/
+unity/Build/

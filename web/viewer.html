@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>Little Prince GLB Viewer</title>
+<style>
+  html,body{margin:0;height:100%;background:#101018;overflow:hidden}
+  #tip{position:fixed;left:12px;top:10px;color:#c9a227;font:13px system-ui;opacity:.8}
+</style>
+<script type="importmap">
+{"imports":{"three":"./vendor/three.module.min.js"}}
+</script>
+</head>
+<body>
+<div id="tip">drag = orbit | wheel = zoom | right-drag = pan</div>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from './vendor/loaders/GLTFLoader.js';
+import { OrbitControls } from './vendor/controls/OrbitControls.js';
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x101018);
+const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.01, 100);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(devicePixelRatio);
+document.body.appendChild(renderer.domElement);
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0x334, 1.2));
+const dir = new THREE.DirectionalLight(0xffffff, 1.5);
+dir.position.set(2, 4, 3);
+scene.add(dir);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+
+new GLTFLoader().load('./models/little-prince.glb', (gltf) => {
+  const obj = gltf.scene;
+  scene.add(obj);
+  const box = new THREE.Box3().setFromObject(obj);
+  const center = box.getCenter(new THREE.Vector3());
+  const size = box.getSize(new THREE.Vector3()).length();
+  controls.target.copy(center);
+  camera.position.copy(center).add(new THREE.Vector3(0, size * 0.25, size * 0.9));
+  camera.near = size / 100; camera.far = size * 10;
+  camera.updateProjectionMatrix();
+}, undefined, (e) => { document.getElementById('tip').textContent = 'load error: ' + e; });
+
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+renderer.setAnimationLoop(() => { controls.update(); renderer.render(scene, camera); });
+</script>
+</body>
+</html>
