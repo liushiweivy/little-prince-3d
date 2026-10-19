@@ -1,11 +1,16 @@
-/* 小王子角色：几何体拼装（M1 阶段换 Tripo GLB），球面重力移动 + 跳跃 */
+/* 小王子角色：TripoSR GLB（M1，加载完成前用几何体占位），球面重力移动 + 跳跃 */
 import * as THREE from '../vendor/three.module.min.js';
+import { GLTFLoader } from '../vendor/loaders/GLTFLoader.js';
 import { moveOnSphere, latLonToDir } from './sphere-math.js';
 
 const WALK_SPEED = 4;
 const RUN_MULT = 1.8;
 const GRAVITY = 22;
 const JUMP_VEL = 7.5;
+
+const MODEL_URL = './models/little-prince.glb';
+const MODEL_HEIGHT = 1.1;   // 比例约定：角色高 1.1 单位
+const MODEL_YAW = Math.PI / 2; // GLB 原始朝向 -X，转到本地 +Z（与占位几何体一致）
 
 function buildPrince() {
   const g = new THREE.Group();
@@ -48,6 +53,20 @@ function buildPrince() {
   return g;
 }
 
+/* GLB 归一化：XZ 居中、脚底贴 y=0、身高缩放到 MODEL_HEIGHT、朝向本地 +Z */
+function normalizeModel(obj) {
+  const box = new THREE.Box3().setFromObject(obj);
+  const size = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+  const s = MODEL_HEIGHT / size.y;
+  const wrap = new THREE.Group();
+  obj.position.set(-center.x * s, -box.min.y * s, -center.z * s);
+  obj.scale.setScalar(s);
+  obj.rotation.y = MODEL_YAW;
+  wrap.add(obj);
+  return wrap;
+}
+
 export class Player {
   constructor(scene, radius, spawnLat = 0, spawnLon = 0) {
     this.radius = radius;
@@ -56,8 +75,15 @@ export class Player {
     this.forward = new THREE.Vector3(0, 0, 1); // 切向朝向，首帧会投影到切平面
     this.height = 0;   // 离地高度（沿 up 方向）
     this.vSpeed = 0;   // 竖直（径向）速度
-    this.mesh = buildPrince();
+    this.mesh = buildPrince(); // 占位，GLB 就绪后替换
     scene.add(this.mesh);
+    new GLTFLoader().load(MODEL_URL, (gltf) => {
+      const model = normalizeModel(gltf.scene);
+      this.mesh.clear();
+      this.mesh.add(model);
+    }, undefined, (e) => {
+      console.warn('little-prince.glb 加载失败，保留占位几何体', e);
+    });
     this.syncMesh();
   }
 

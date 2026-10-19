@@ -26,7 +26,10 @@ renderer.setSize(innerWidth, innerHeight);
 renderer.setPixelRatio(devicePixelRatio);
 document.body.appendChild(renderer.domElement);
 
-scene.add(new THREE.HemisphereLight(0xffffff, 0x334, 1.2));
+scene.add(new THREE.HemisphereLight(0xffffff, 0x334455, 1.6));
+scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+const grid = new THREE.GridHelper(2, 8, 0x888888, 0x334455);
+scene.add(grid);
 const dir = new THREE.DirectionalLight(0xffffff, 1.5);
 dir.position.set(2, 4, 3);
 scene.add(dir);
@@ -34,14 +37,16 @@ scene.add(dir);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 
-new GLTFLoader().load('./models/little-prince.glb', (gltf) => {
+const modelUrl = './models/' + (new URLSearchParams(location.search).get('m') || 'little-prince') + '.glb';
+new GLTFLoader().load(modelUrl, (gltf) => {
   const obj = gltf.scene;
   scene.add(obj);
   const box = new THREE.Box3().setFromObject(obj);
   const center = box.getCenter(new THREE.Vector3());
   const size = box.getSize(new THREE.Vector3()).length();
   controls.target.copy(center);
-  camera.position.copy(center).add(new THREE.Vector3(0, size * 0.25, size * 0.9));
+  const az = (parseFloat(new URLSearchParams(location.search).get('az')) || 0) * Math.PI / 180;
+  camera.position.copy(center).add(new THREE.Vector3(Math.sin(az) * size * 0.9, size * 0.25, Math.cos(az) * size * 0.9));
   camera.near = size / 100; camera.far = size * 10;
   camera.updateProjectionMatrix();
 }, undefined, (e) => { document.getElementById('tip').textContent = 'load error: ' + e; });

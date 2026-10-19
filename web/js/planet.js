@@ -1,5 +1,6 @@
-/* 星球与场景：B612 地面、玫瑰（玻璃罩）、猴面包树、火山、星空与远处行星 */
+/* 星球与场景：B612 地面、玫瑰（玻璃罩）、狐狸、猴面包树、火山、星空与远处行星 */
 import * as THREE from '../vendor/three.module.min.js';
+import { GLTFLoader } from '../vendor/loaders/GLTFLoader.js';
 import { latLonToDir } from './sphere-math.js';
 
 export const PLANET_RADIUS = 10;
@@ -34,31 +35,38 @@ function makeGround() {
   return new THREE.Mesh(geo, mat);
 }
 
-function makeRose() {
-  const g = new THREE.Group();
-  const green = new THREE.MeshStandardMaterial({ color: 0x3f8f5a, roughness: 0.8 });
-  const red = new THREE.MeshStandardMaterial({ color: 0xc23a4e, roughness: 0.6 });
-  const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.045, 0.9, 6), green);
-  stem.position.y = 0.45;
-  g.add(stem);
-  for (let i = 0; i < 6; i++) {
-    const petal = new THREE.Mesh(new THREE.ConeGeometry(0.13, 0.3, 5), red);
-    const a = (i / 6) * Math.PI * 2;
-    petal.position.set(Math.cos(a) * 0.12, 1.0, Math.sin(a) * 0.12);
-    petal.rotation.set(Math.PI * 0.32, 0, -a);
-    g.add(petal);
-  }
-  const core = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 6), red);
-  core.position.y = 1.02;
-  g.add(core);
+/* GLB 道具归一化：XZ 居中、底部贴 y=0、高度缩放到 targetHeight、偏航 yaw */
+function normalizeProp(obj, targetHeight, yaw = 0) {
+  const box = new THREE.Box3().setFromObject(obj);
+  const size = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+  const s = targetHeight / size.y;
+  const wrap = new THREE.Group();
+  obj.position.set(-center.x * s, -box.min.y * s, -center.z * s);
+  obj.scale.setScalar(s);
+  obj.rotation.y = yaw;
+  wrap.add(obj);
+  return wrap;
+}
+
+/* 异步把 GLB 道具挂到球面锚点上（占位先行，模型就绪后插入） */
+function loadPropOnSphere(scene, url, latDeg, lonDeg, targetHeight, yaw = 0, sink = 0.02) {
+  const anchor = placeOnSphere(new THREE.Group(), latDeg, lonDeg, sink);
+  scene.add(anchor);
+  new GLTFLoader().load(url, (gltf) => {
+    anchor.add(normalizeProp(gltf.scene, targetHeight, yaw));
+  }, undefined, (e) => console.warn(url + ' 加载失败', e));
+  return anchor;
+}
+
+function makeRoseDome() {
   // 玻璃罩：小王子给玫瑰罩的那个
   const dome = new THREE.Mesh(
     new THREE.SphereGeometry(0.75, 20, 14, 0, Math.PI * 2, 0, Math.PI / 2),
     new THREE.MeshPhongMaterial({ color: 0xcfe8ff, transparent: true, opacity: 0.22, shininess: 120, side: THREE.DoubleSide })
   );
   dome.position.y = 0.05;
-  g.add(dome);
-  return g;
+  return dome;
 }
 
 function makeBaobab() {
@@ -170,7 +178,10 @@ export function createPlanet(scene) {
   scene.add(makeStars());
   scene.add(makeSkyPlanets());
 
-  placeOnSphere(makeRose(), 8, 10, 0.02);
+  // 玫瑰（TripoSR GLB）+ 玻璃罩；狐狸在玫瑰不远处
+  const roseAnchor = loadPropOnSphere(scene, './models/rose.glb', 8, 10, 0.62);
+  roseAnchor.add(makeRoseDome());
+  loadPropOnSphere(scene, './models/fox.glb', 2, -14, 0.72, -Math.PI / 2); // 原模面朝 +X，R_y(-π/2) 转到 +Z
   scene.add(placeOnSphere(makeBaobab(), 40, 120, 0.05));
   scene.add(placeOnSphere(makeBaobab(), -30, 200, 0.05));
   scene.add(placeOnSphere(makeBaobab(), 60, 300, 0.05));

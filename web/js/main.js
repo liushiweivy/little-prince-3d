@@ -4,7 +4,7 @@ import { createPlanet, PLANET_RADIUS } from './planet.js';
 import { Player } from './player.js';
 import { FollowCamera } from './follow-camera.js';
 import { Input } from './controls.js';
-import { cameraBasis, normalize, add, scale } from './sphere-math.js';
+import { cameraBasis, normalize, add, scale, latLonToDir } from './sphere-math.js';
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -19,6 +19,17 @@ createPlanet(scene);
 const player = new Player(scene, PLANET_RADIUS, 0, 0); // 出生在玫瑰附近
 const followCam = new FollowCamera(camera);
 const input = new Input();
+
+// 调试钩子：控制台可 __debug.teleport(lat, lon) 瞬移
+window.__debug = {
+  player,
+  teleport(latDeg, lonDeg) {
+    const d = latLonToDir(latDeg, lonDeg);
+    player.pos.set(d.x, d.y, d.z).multiplyScalar(PLANET_RADIUS);
+    player.height = 0; player.vSpeed = 0;
+    player.syncMesh();
+  },
+};
 
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
