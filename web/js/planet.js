@@ -7,6 +7,21 @@ export const PLANET_RADIUS = 10;
 
 const UP_Y = new THREE.Vector3(0, 1, 0);
 
+// 道具模型：默认混元3D Pro（原生朝 +Z，yaw=0）；?model=triposr 用旧 TripoSR 模型（狐狸原模朝 +X）
+const PROP_VARIANTS = {
+  hunyuan: {
+    rose: { file: './models/hunyuan-rose.glb', yaw: 0 },
+    fox: { file: './models/hunyuan-fox.glb', yaw: 0 },
+  },
+  triposr: {
+    rose: { file: './models/rose.glb', yaw: 0 },
+    fox: { file: './models/fox.glb', yaw: -Math.PI / 2 },
+  },
+};
+const PROP_VARIANT = new URLSearchParams(location.search).get('model') === 'triposr'
+  ? 'triposr' : 'hunyuan';
+const PROPS = PROP_VARIANTS[PROP_VARIANT];
+
 /* 把道具放到球面 lat/lon 处，Y 轴对齐法线；sink>0 时往地里沉一点 */
 function placeOnSphere(obj, latDeg, lonDeg, sink = 0) {
   const dir = latLonToDir(latDeg, lonDeg);
@@ -179,9 +194,9 @@ export function createPlanet(scene) {
   scene.add(makeSkyPlanets());
 
   // 玫瑰（TripoSR GLB）+ 玻璃罩；狐狸在玫瑰不远处
-  const roseAnchor = loadPropOnSphere(scene, './models/rose.glb', 8, 10, 0.62);
+  const roseAnchor = loadPropOnSphere(scene, PROPS.rose.file, 8, 10, 0.62, PROPS.rose.yaw);
   roseAnchor.add(makeRoseDome());
-  loadPropOnSphere(scene, './models/fox.glb', 2, -14, 0.72, -Math.PI / 2); // 原模面朝 +X，R_y(-π/2) 转到 +Z
+  loadPropOnSphere(scene, PROPS.fox.file, 2, -14, 0.72, PROPS.fox.yaw); // yaw 把原模脸朝向转到 +Z
   scene.add(placeOnSphere(makeBaobab(), 40, 120, 0.05));
   scene.add(placeOnSphere(makeBaobab(), -30, 200, 0.05));
   scene.add(placeOnSphere(makeBaobab(), 60, 300, 0.05));

@@ -5,6 +5,8 @@ __pycache__/
 python-path.txt
 # 生成的 3D 资产与构建产物
 assets/gen/
+# 腾讯云密钥（本地独享，绝不入库）
+tools/hunyuan.local.json
 unity/Library/
 unity/Temp/
 unity/Obj/

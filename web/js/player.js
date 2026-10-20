@@ -1,4 +1,4 @@
-/* 小王子角色：TripoSR GLB（M1，加载完成前用几何体占位），球面重力移动 + 跳跃 */
+/* 小王子角色：混元3D GLB（M1，加载完成前用几何体占位），球面重力移动 + 跳跃 */
 import * as THREE from '../vendor/three.module.min.js';
 import { GLTFLoader } from '../vendor/loaders/GLTFLoader.js';
 import { moveOnSphere, latLonToDir } from './sphere-math.js';
@@ -8,9 +8,22 @@ const RUN_MULT = 1.8;
 const GRAVITY = 22;
 const JUMP_VEL = 7.5;
 
-const MODEL_URL = './models/little-prince.glb';
+// 角色模型：rigged = Mixamo 绑骨带动画版（默认，缺文件时回退静态混元）；
+// ?model=hunyuan/100k/triposr 可看旧的静态模型
+const MODEL_VARIANTS = {
+  rigged: { file: './models/prince_rigged.glb', yaw: 0, animated: true }, // Mixamo 绑骨 idle/walk/run
+  hunyuan: { file: './models/hunyuan-prince.glb', yaw: 0 },        // 混元 Pro 50 万面 master（28MB）
+  hunyuan100k: { file: './models/hunyuan-prince-100k.glb', yaw: 0 }, // 混元 Pro 10 万面轻量版（14MB）
+  triposr: { file: './models/little-prince.glb', yaw: Math.PI / 2 },
+};
+const qsModel = new URLSearchParams(location.search).get('model');
+const MODEL_VARIANT = MODEL_VARIANTS[qsModel] ? qsModel : 'rigged';
+const { file: MODEL_URL, yaw: MODEL_YAW, animated: MODEL_ANIMATED } = MODEL_VARIANTS[MODEL_VARIANT];
+const MODEL_FALLBACK = MODEL_VARIANTS.hunyuan100k; // 绑骨版没产出时回退
 const MODEL_HEIGHT = 1.1;   // 比例约定：角色高 1.1 单位
-const MODEL_YAW = Math.PI / 2; // GLB 原始朝向 -X，转到本地 +Z（与占位几何体一致）
+
+// 动作在 timeScale=1 时对应的切平面位移速度（m/s），用于按实际速度缩放周期防滑步
+const ANIM_GROUND_SPEED = { idle: 0, walk: 2.0, run: 3.6 };
 
 function buildPrince() {
   const g = new THREE.Group();
@@ -77,14 +90,63 @@ export class Player {
     this.vSpeed = 0;   // 竖直（径向）速度
     this.mesh = buildPrince(); // 占位，GLB 就绪后替换
     scene.add(this.mesh);
-    new GLTFLoader().load(MODEL_URL, (gltf) => {
+    this.mixer = null;
+    this.actions = {};
+    this.animState = 'idle';
+    this.speedNow = 0;
+    this.loadModel(MODEL_URL, MODEL_ANIMATED, MODEL_FALLBACK);
+    this.syncMesh();
+  }
+
+  /* 加载角色 GLB；animated=true 时建立 AnimationMixer，失败回退静态模型 */
+  loadModel(url, animated, fallback) {
+    new GLTFLoader().load(url, (gltf) => {
       const model = normalizeModel(gltf.scene);
       this.mesh.clear();
       this.mesh.add(model);
+      if (animated) this.setupMixer(gltf);
     }, undefined, (e) => {
-      console.warn('little-prince.glb 加载失败，保留占位几何体', e);
+      if (fallback) {
+        console.warn(`${url} 加载失败，回退 ${fallback.file}`, e);
+        this.loadModel(fallback.file, false, null);
+      } else {
+        console.warn(`${url} 加载失败，保留占位几何体`, e);
+      }
     });
-    this.syncMesh();
+  }
+
+  setupMixer(gltf) {
+    this.mixer = new THREE.AnimationMixer(gltf.scene);
+    for (const clip of gltf.animations) {
+      const name = clip.name.toLowerCase();
+      const key = name.startsWith('walk') ? 'walk'
+        : name.startsWith('run') ? 'run'
+        : name.startsWith('idle') ? 'idle' : name;
+      const act = this.mixer.clipAction(clip);
+      act.name = key;
+      this.actions[key] = act;
+    }
+    this.actions.idle?.reset().play();
+    this.animState = 'idle';
+    if (!this.actions.idle) console.warn('GLB 里没有 idle 片段：', gltf.animations.map(c => c.name));
+  }
+
+  /* 按切平面速度切换 idle/walk/run，并按速度缩放动作周期（in-place 动画防滑步） */
+  updateAnim(dt) {
+    if (!this.mixer) return;
+    const v = this.speedNow;
+    const want = v < 0.6 ? 'idle' : (v > WALK_SPEED * 1.25 ? 'run' : 'walk');
+    if (want !== this.animState) {
+      const next = this.actions[want] ?? this.actions.idle;
+      const cur = this.actions[this.animState] ?? this.actions.idle;
+      next.reset().fadeIn(0.2).play();
+      cur?.fadeOut(0.2);
+      this.animState = want;
+    }
+    const ground = ANIM_GROUND_SPEED[want] ?? 1;
+    const act = this.actions[want];
+    if (act) act.timeScale = want === 'idle' ? 1 : THREE.MathUtils.clamp(v / ground, 0.35, 2.2);
+    this.mixer.update(dt);
   }
 
   get up() {
@@ -94,6 +156,7 @@ export class Player {
   /* moveDir：相机相对切向单位向量（已合成 WASD）；jump：本帧是否按跳；running：是否加速 */
   update(dt, moveDir, jump, running) {
     const speed = WALK_SPEED * (running ? RUN_MULT : 1);
+    this.speedNow = moveDir ? speed : 0;
     if (moveDir) {
       const step = moveOnSphere(this.pos, moveDir, speed * dt);
       this.pos.set(step.pos.x, step.pos.y, step.pos.z);
@@ -108,6 +171,7 @@ export class Player {
       this.height += this.vSpeed * dt;
       if (this.height <= 0) { this.height = 0; this.vSpeed = 0; }
     }
+    this.updateAnim(dt);
     this.syncMesh();
   }
 
