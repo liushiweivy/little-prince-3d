@@ -1,7 +1,27 @@
 # 小王子 3D 网页漫游 —— 工作流与最小 Demo
 
-在小行星 B612 上自由行走（球面重力 + 第三人称跟随相机）的网页小游戏。
+在小行星 B612 上自由行走（球面重力 + 第三人称跟随相机）的网页小游戏，现已有 B-612 + 旅途六星 + 地球共 8 个星球、10 段原著对话、星图旅行，并提供 **Tauri 桌面版**（双击即玩，无需浏览器/服务器）。
 本仓库按「先 Three.js 原型跑通玩法 → 再上美术资产 → 最后 Unity WebGL 定版」的节奏推进。
+
+## 桌面版（Tauri v2）
+
+```bat
+play.bat          :: 双击即玩（无 exe 时自动构建，首次编译依赖约 10-20 分钟）
+```
+
+- 游戏本体是纯静态页面（web/），桌面壳只嵌 WebView2（系统已装，免引导器）。
+- 构建产物：`src-tauri/target/release/little-prince.exe`（双击即玩）+ NSIS 安装包 `.../bundle/nsis/`（NSIS 工具链从 GitHub 下载，本机网络超时则跳过安装包只留 exe，网络好后重跑 `npm run tauri:build` 自动续）。
+- 桌面版只打包 **lite 减面档**（`web/models/lite/`，~84MB）+ glass-dome full 档（assets.js LITE_SKIP 玻璃材质豁免）+ triposr 三小档，白名单由 `tools/prepare_app_dist.py` 生成到 `dist-app/`（构建前自动执行）。
+- 重建依赖：Rust（cargo）+ Node（@tauri-apps/cli devDependency）+ Python312（dist 脚本路径在 package.json `app:dist`，换机需改）。
+- `npm run tauri:dev` 是开发模式：需**先起 8850 开发服务器**（start.bat）再跑，窗口加载 devUrl。
+
+## 资产档位：lite（默认）/ full
+
+- 混元原档每个 50 万面 + 3 张 4096² PNG（全场 1076MB），导致越玩越卡。
+- 现默认加载 `web/models/lite/` 减面档（83.6MB / 62.5 万面，贴图 1024²），按星球懒加载、离开即 dispose。
+- 回退原档：URL 加 `?assets=full`（切档开关在 `web/js/assets.js`，只重写 `hunyuan-*.glb` 路径）。
+- 重生成 lite：`blender.exe --background --python blender/decimate_glb.py -- [--only a,b] [--force] [--tex 1024]`（原档保留不覆盖）。
+- ⚠️ 已知错档（2026-10-22）：玻璃罩玫瑰/死火山/喷泉/辘轳井/木长椅 5 个源文件内容是其他道具的替身，清单与恢复步骤见 `assets/input/MISSING_ASSETS.md`（不影响运行，影响还原度）。
 
 ## 一、最小 Demo 环境清单（本机已具备 ✅）
 
@@ -77,6 +97,7 @@ node --test tools/test_sphere.mjs   # 球面数学层（不依赖 three）
 ## 六、路线图
 
 1. ✅ M0：Three.js 球面行走原型（本次）
-2. ⬜ M1：Tripo 出小王子/玫瑰/狐狸 GLB → Blender 修模 → 原型内 GLTFLoader 加载替换几何体
-3. ⬜ M2：玩法层（多星球跳跃/收集星星/对话气泡）
-4. ⬜ M3：Unity 工程重建 + WebGL 导出定版
+2. ✅ M1：混元 3D 出小王子/NPC/道具 GLB → Blender 修模 → 原型内 GLTFLoader 加载
+3. ✅ M2：玩法层（8 星球星图旅行、10 段对话、右键寻路）
+4. ✅ M2.5：性能治理（lite 减面 83.6MB/62.5 万面 + 按星懒加载 dispose）+ Tauri v2 桌面版
+5. ⬜ M3：Unity 工程重建 + WebGL 导出定版（或继续打磨 Three.js 版）

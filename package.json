@@ -1,0 +1,15 @@
+{
+  "name": "little-prince-3d",
+  "version": "1.0.0",
+  "private": true,
+  "description": "小王子：星辰之旅 — Three.js 球面行星 + Tauri 桌面版",
+  "scripts": {
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build",
+    "app:dist": "C:/Users/4v/AppData/Local/Programs/Python/Python312/python.exe tools/prepare_app_dist.py"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2"
+  }
+}

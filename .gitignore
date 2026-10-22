@@ -11,6 +11,15 @@ assets/models/
 assets/input/_raw/
 # 腾讯云密钥（本地独享，绝不入库）
 tools/hunyuan.local.json
+# 桌面版构建产物（dist-app 由 tools/prepare_app_dist.py 白名单生成）
+node_modules/
+dist-app/
+src-tauri/target/
+src-tauri/gen/
+# 质检/识别渲染输出（证据图留磁盘不入库，脚本入库）
+blender/views/
+# 酒瓶浮雕牌残次品（未摆入游戏，本地留档，72MB 不入库）
+web/models/hunyuan-wine-bottle.glb
 unity/Library/
 unity/Temp/
 unity/Obj/
