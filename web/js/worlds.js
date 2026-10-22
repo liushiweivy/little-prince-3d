@@ -443,7 +443,9 @@ function buildDecor(def, group) {
 function buildWorld(scene, def) {
   const group = new THREE.Group();
   group.position.fromArray(def.center);
-  group.add(makeGround(def.radius, def.palette));
+  const ground = makeGround(def.radius, def.palette);
+  ground.userData.isGround = true; // 右键点地 raycast 的命中目标
+  group.add(ground);
   buildDecor(def, group);
 
   // NPC（异步 GLB）+ 名字牌，一律面向本星出生点（玩家来路）
@@ -471,6 +473,7 @@ function buildWorld(scene, def) {
   return {
     def, group,
     center,
+    ground,
     npcs: npcRuntimes,
     padLocal: dirToLocal(def.radius, def.pad.lat, def.pad.lon),
     padWorld: center.clone().add(dirToLocal(def.radius, def.pad.lat, def.pad.lon)),
