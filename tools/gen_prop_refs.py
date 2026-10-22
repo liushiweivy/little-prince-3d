@@ -93,6 +93,12 @@ PROPS = {
         "each side and one long seat plank, warm brown wood, soft matte "
         "clay texture, single object centered, plain solid white "
         "background, no ground, no text"),
+    "grapes": (
+        "a 3D rendered bunch of plump ripe purple grapes fruit with green "
+        "stem and one green leaf, glossy stylized painted look, single "
+        "fruit bunch floating centered and fully visible, plain solid "
+        "pure white background, no character no person no face no toy, "
+        "no table no ground, no text"),
 }
 
 SEEDS = {
@@ -100,6 +106,7 @@ SEEDS = {
     "glass-dome": 304, "chair": 305, "throne": 206, "streetlamp": 207,
     "globe": 208, "giant-book": 209, "plane-wreck": 210, "well": 411,
     "sheep-box": 412, "wine-bottle": 513, "wooden-bench": 214,
+    "grapes": 217,
 }
 
 
