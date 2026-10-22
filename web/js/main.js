@@ -4,7 +4,11 @@ import { createWorlds } from './worlds.js';
 import { Player } from './player.js';
 import { FollowCamera } from './follow-camera.js?v=4';
 import { Input } from './controls.js';
+import { DialogueUI } from './dialogue-ui.js';
+import { DIALOGUES } from './dialogues.js';
 import { cameraBasis, normalize, add, scale, latLonToDir } from './sphere-math.js';
+
+const TALK_RANGE = 2.6; // 离 NPC 多近可以按 E 交谈
 
 const FADE_OUT = 0.62;   // 淡出时长（秒）
 const DESCEND = 1.9;    // 落点高度 → 地面
@@ -28,6 +32,7 @@ const player = new Player(scene, {
 });
 const followCam = new FollowCamera(camera);
 const input = new Input();
+const dialogue = new DialogueUI();
 
 const planetNameEl = document.getElementById('planet-name');
 const padPromptEl = document.getElementById('pad-prompt');
@@ -66,6 +71,20 @@ function openMap() {
 function closeMap() {
   mapOpen = false;
   starmapEl.classList.add('hidden');
+}
+
+/* 交谈：NPC 在自身切平面内转身面向玩家，再打开对话面板 */
+function startDialogue(npc) {
+  if (!DIALOGUES[npc.key]) return; // 未配对话的 NPC 按 E 不应表现成卡住
+  const n = npc.anchor.position.clone().normalize();
+  const f = player.pos.clone().addScaledVector(n, -player.pos.dot(n));
+  if (f.lengthSq() > 1e-8) {
+    f.normalize();
+    const x = new THREE.Vector3().crossVectors(n, f);
+    npc.anchor.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(x, n, f));
+  }
+  padPromptEl.classList.add('hidden');
+  dialogue.start(npc);
 }
 
 /* 旅行过场：淡出 → 换星球（从高处出现）→ 淡入 + 落下 */
@@ -128,12 +147,27 @@ function frame() {
       const k = Math.min(travel.t / DESCEND, 1);
       const eased = 1 - (1 - k) * (1 - k);
       player.tickTravel(dt, START_HEIGHT * (1 - eased));
-      if (k >= 1) travel.active = false;
+      if (k >= 1) {
+        travel.active = false;
+        input.flush(); // 过场期间按的键不许在落点第一帧触发
+      }
+    } else {
+      input.flush();
     }
   } else if (mapOpen) {
     // 星图打开时原地待机
     player.tickTravel(dt, 0);
-    if (input.takeCancel()) closeMap();
+    if (input.takeCancel()) {
+      closeMap();
+      input.flush(); // 关图同帧丢弃残留 E，防止立刻重开/误开对话
+    } else {
+      input.takeInteract();
+      input.takeJump();
+    }
+  } else if (dialogue.active) {
+    // 对话中原地待机；推进/结束由 DialogueUI 消费按键
+    player.tickTravel(dt, 0);
+    dialogue.update(dt, input);
   } else {
     // 相机前向 → 角色切平面移动基
     const camDir = new THREE.Vector3();
@@ -149,10 +183,34 @@ function frame() {
 
     player.update(dt, moveDir, input.takeJump(), input.running);
 
-    // E 随时开星图；靠近本星出发台时给提示
-    if (input.takeInteract()) openMap();
+    // 找最近的可交谈 NPC
+    let nearNpc = null;
+    let nearDist = TALK_RANGE;
+    for (const npc of current.npcs) {
+      const wp = current.center.clone().add(npc.anchor.position);
+      const d = player.worldPos.distanceTo(wp);
+      if (d < nearDist) { nearDist = d; nearNpc = npc; }
+    }
+
+    // E：身边有人先交谈，否则打开星图
+    if (input.takeInteract()) {
+      if (nearNpc) startDialogue(nearNpc);
+      else openMap();
+    }
+
+    // 上下文提示：对话中始终隐藏；否则交谈优先于出发台
     const nearPad = player.worldPos.distanceTo(current.padWorld) < 2.4;
-    padPromptEl.classList.toggle('hidden', !nearPad);
+    let promptHtml = null;
+    if (!dialogue.active) {
+      if (nearNpc) promptHtml = `按 <b>E</b> 与「${nearNpc.label}」交谈`;
+      else if (nearPad) promptHtml = '按 <b>E</b> 打开星图出发';
+    }
+    if (promptHtml === null) {
+      padPromptEl.classList.add('hidden');
+    } else {
+      if (padPromptEl.innerHTML !== promptHtml) padPromptEl.innerHTML = promptHtml;
+      padPromptEl.classList.remove('hidden');
+    }
   }
 
   for (const beam of beams) {

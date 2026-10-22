@@ -10,11 +10,19 @@
 <body>
   <div id="hud">
     <h1 id="planet-name">小王子 <span>·</span> B-612 小行星</h1>
-    <p class="hint">WASD / 方向键 行走　Space 跳跃　Shift 加速跑　E 打开星图</p>
-    <p class="hint dim" id="sub-hint">找到金色出发台，启程拜访沿途六颗小行星</p>
+    <p class="hint">WASD / 方向键 行走　Space 跳跃　Shift 加速跑　E 交谈 / 星图</p>
+    <p class="hint dim" id="sub-hint">走近角色按 E 交谈；到金色出发台按 E 启程拜访沿途六颗小行星</p>
   </div>
 
   <div id="pad-prompt" class="hidden">按 <b>E</b> 打开星图出发</div>
+
+  <div id="dialogue" class="hidden">
+    <div class="dialogue-card">
+      <div id="dialogue-speaker" class="speaker"></div>
+      <p id="dialogue-text"></p>
+      <div id="dialogue-next">E / 点击 继续 ▾</div>
+    </div>
+  </div>
 
   <div id="starmap" class="hidden">
     <div class="starmap-card">

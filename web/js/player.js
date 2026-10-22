@@ -130,6 +130,7 @@ export class Player {
   /* 过场期间只播 idle 动画并同步模型，不走移动/重力 */
   tickTravel(dt, height) {
     this.height = height;
+    this.vSpeed = 0; // 对话/星图把高度钉在 0，残留的跳跃速度不能留到恢复玩法后
     this.speedNow = 0;
     this.updateAnim(dt);
     this.syncMesh();

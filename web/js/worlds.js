@@ -25,8 +25,8 @@ export const WORLD_DEFS = [
     pad: { lat: -16, lon: 150 },
     spawn: { lat: -16, lon: 150, face: { lat: 8, lon: 10 } },
     npcs: [
-      { model: ROSE_FILE, yaw: ROSE_YAW, lat: 8, lon: 10, height: 0.62, label: '玫瑰', dome: true },
-      { model: FOX_FILE, yaw: FOX_YAW, lat: 2, lon: -14, height: 0.72, label: '狐狸' },
+      { model: ROSE_FILE, yaw: ROSE_YAW, lat: 8, lon: 10, height: 0.62, label: '玫瑰', dome: true, dialogue: 'rose' },
+      { model: FOX_FILE, yaw: FOX_YAW, lat: 2, lon: -14, height: 0.72, label: '狐狸', dialogue: 'fox' },
     ],
   },
   {
@@ -36,7 +36,7 @@ export const WORLD_DEFS = [
     grass: 220, flowers: 0,
     pad: { lat: -18, lon: 10 },
     spawn: { lat: -18, lon: 10, face: { lat: 18, lon: 0 } },
-    npcs: [{ model: './models/hunyuan-king.glb', yaw: 0, lat: 18, lon: 0, height: 1.0, label: '国王' }],
+    npcs: [{ model: './models/hunyuan-king.glb', yaw: 0, lat: 18, lon: 0, height: 1.0, label: '国王', dialogue: 'king' }],
   },
   {
     id: 'vainman', num: '326', name: '326 号行星 · 爱虚荣的人',
@@ -45,7 +45,7 @@ export const WORLD_DEFS = [
     grass: 220, flowers: 14,
     pad: { lat: -18, lon: 10 },
     spawn: { lat: -18, lon: 10, face: { lat: 18, lon: 0 } },
-    npcs: [{ model: './models/hunyuan-vainman.glb', yaw: 0, lat: 18, lon: 0, height: 0.98, label: '爱虚荣的人' }],
+    npcs: [{ model: './models/hunyuan-vainman.glb', yaw: 0, lat: 18, lon: 0, height: 0.98, label: '爱虚荣的人', dialogue: 'vainman' }],
   },
   {
     id: 'drunkard', num: '327', name: '327 号行星 · 酒鬼',
@@ -54,7 +54,7 @@ export const WORLD_DEFS = [
     grass: 180, flowers: 0,
     pad: { lat: -18, lon: 10 },
     spawn: { lat: -18, lon: 10, face: { lat: 18, lon: 0 } },
-    npcs: [{ model: './models/hunyuan-drunkard.glb', yaw: 0, lat: 18, lon: 0, height: 0.82, label: '酒鬼' }],
+    npcs: [{ model: './models/hunyuan-drunkard.glb', yaw: 0, lat: 18, lon: 0, height: 0.82, label: '酒鬼', dialogue: 'drunkard' }],
   },
   {
     id: 'merchant', num: '328', name: '328 号行星 · 商人',
@@ -63,7 +63,7 @@ export const WORLD_DEFS = [
     grass: 200, flowers: 0,
     pad: { lat: -18, lon: 10 },
     spawn: { lat: -18, lon: 10, face: { lat: 18, lon: 0 } },
-    npcs: [{ model: './models/hunyuan-merchant.glb', yaw: 0, lat: 18, lon: 0, height: 0.98, label: '商人' }],
+    npcs: [{ model: './models/hunyuan-merchant.glb', yaw: 0, lat: 18, lon: 0, height: 0.98, label: '商人', dialogue: 'merchant' }],
   },
   {
     id: 'lamplighter', num: '329', name: '329 号行星 · 点灯人',
@@ -72,7 +72,7 @@ export const WORLD_DEFS = [
     grass: 160, flowers: 0,
     pad: { lat: -22, lon: 8 },
     spawn: { lat: -22, lon: 8, face: { lat: 16, lon: 0 } },
-    npcs: [{ model: './models/hunyuan-lamplighter.glb', yaw: 0, lat: 16, lon: 0, height: 0.92, label: '点灯人' }],
+    npcs: [{ model: './models/hunyuan-lamplighter.glb', yaw: 0, lat: 16, lon: 0, height: 0.92, label: '点灯人', dialogue: 'lamplighter' }],
   },
   {
     id: 'geographer', num: '330', name: '330 号行星 · 地理学家',
@@ -81,7 +81,7 @@ export const WORLD_DEFS = [
     grass: 240, flowers: 10,
     pad: { lat: -18, lon: 10 },
     spawn: { lat: -18, lon: 10, face: { lat: 18, lon: 0 } },
-    npcs: [{ model: './models/hunyuan-geographer.glb', yaw: 0, lat: 18, lon: 0, height: 1.05, label: '地理学家' }],
+    npcs: [{ model: './models/hunyuan-geographer.glb', yaw: 0, lat: 18, lon: 0, height: 1.05, label: '地理学家', dialogue: 'geographer' }],
   },
   {
     id: 'earth', num: '地球', name: '地球 · 撒哈拉沙漠',
@@ -91,8 +91,8 @@ export const WORLD_DEFS = [
     pad: { lat: 4, lon: 150 },
     spawn: { lat: 4, lon: 150, face: { lat: 12, lon: -140 } },
     npcs: [
-      { model: './models/hunyuan-pilot.glb', yaw: 0, lat: 12, lon: -140, height: 1.0, label: '飞行员' },
-      { model: './models/hunyuan-snake.glb', yaw: 0, lat: -8, lon: 40, height: 0.6, label: '蛇' },
+      { model: './models/hunyuan-pilot.glb', yaw: 0, lat: 12, lon: -140, height: 1.0, label: '飞行员', dialogue: 'pilot' },
+      { model: './models/hunyuan-snake.glb', yaw: 0, lat: -8, lon: 40, height: 0.6, label: '蛇', dialogue: 'snake' },
     ],
   },
 ];
@@ -447,6 +447,7 @@ function buildWorld(scene, def) {
   buildDecor(def, group);
 
   // NPC（异步 GLB）+ 名字牌，一律面向本星出生点（玩家来路）
+  const npcRuntimes = [];
   for (const npc of def.npcs) {
     const anchor = makeFacingAnchor(def.radius, npc.lat, npc.lon, def.spawn);
     gltfLoader.load(npc.model, (gltf) => {
@@ -457,6 +458,7 @@ function buildWorld(scene, def) {
     label.position.y = npc.height + 0.55;
     anchor.add(label);
     group.add(anchor);
+    npcRuntimes.push({ key: npc.dialogue, label: npc.label, anchor });
   }
 
   // 出发台
@@ -469,6 +471,7 @@ function buildWorld(scene, def) {
   return {
     def, group,
     center,
+    npcs: npcRuntimes,
     padLocal: dirToLocal(def.radius, def.pad.lat, def.pad.lon),
     padWorld: center.clone().add(dirToLocal(def.radius, def.pad.lat, def.pad.lon)),
   };

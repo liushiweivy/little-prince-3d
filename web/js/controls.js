@@ -49,4 +49,11 @@ export class Input {
     this.cancelQueued = false;
     return v;
   }
+
+  /* 非玩法分支（旅行过场/星图）里清空全部边沿，避免陈旧按键跨状态误触发 */
+  flush() {
+    this.jumpQueued = false;
+    this.interactQueued = false;
+    this.cancelQueued = false;
+  }
 }
