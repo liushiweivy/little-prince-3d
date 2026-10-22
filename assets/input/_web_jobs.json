@@ -1,0 +1,17 @@
+{
+  "channel": "web-v3.1-500k",
+  "submitted": "2026-10-22",
+  "points": "20 -> 12 (1 point per 500k job)",
+  "jobs": {
+    "pilot":        { "id": "6bdc1111-a6c4-48a4-8959-b5ae96859c08", "status": "done", "bytes": 44356492 },
+    "vainman":      { "id": "18eb5d58-2dff-43da-a7a7-094a4701e725", "status": "done", "bytes": 41765860 },
+    "drunkard":     { "id": "ceef8c05-5c5b-4b11-b706-319abe7468ac", "status": "done", "bytes": 40188404 },
+    "snake":        { "id": "077e4c7f-049b-4e71-9310-8e50efa02877", "status": "done", "bytes": 43306656 },
+    "lamplighter":  { "id": "bb0c5e64-a1e7-489e-ac9b-7d57dfc629f1", "status": "done", "bytes": 47949080 },
+    "king":         { "id": "b325e66d-8dd5-4b65-8b8d-b68abe329e29", "status": "done", "bytes": 50312048 },
+    "merchant":     { "id": "4e4124eb-73f4-4283-b059-4e055664ab96", "status": "done", "bytes": 39699780 },
+    "geographer":   { "id": "600b374b-0afc-4df9-9876-9aca6e3c007e", "status": "done", "bytes": 44553172 }
+  },
+  "qa": "all face +Z, ymin=0, PBR textures, ~280k verts each; console 0 errors; previews assets/input/_previews/",
+  "known_quirks": "vainman lost mini top hat and hand mirror; merchant prop reads more like a cup than a ledger; drunkard suit tinted wine-red; king scepter lost but right hand got a scroll-like shape"
+}

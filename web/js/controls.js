@@ -1,8 +1,10 @@
-/* 键盘输入：WASD/方向键移动，Space 跳，Shift 跑 */
+/* 键盘输入：WASD/方向键移动，Space 跳，Shift 跑，E 交互（出发台/星图），Esc 关星图 */
 export class Input {
   constructor() {
     this.keys = new Set();
     this.jumpQueued = false;
+    this.interactQueued = false;
+    this.cancelQueued = false;
     window.addEventListener('keydown', (e) => {
       if (e.repeat) return;
       this.keys.add(e.code);
@@ -10,6 +12,8 @@ export class Input {
         this.jumpQueued = true;
         e.preventDefault();
       }
+      if (e.code === 'KeyE') this.interactQueued = true;
+      if (e.code === 'Escape') this.cancelQueued = true;
     });
     window.addEventListener('keyup', (e) => this.keys.delete(e.code));
     window.addEventListener('blur', () => this.keys.clear());
@@ -32,5 +36,17 @@ export class Input {
     const j = this.jumpQueued;
     this.jumpQueued = false;
     return j;
+  }
+
+  takeInteract() {
+    const v = this.interactQueued;
+    this.interactQueued = false;
+    return v;
+  }
+
+  takeCancel() {
+    const v = this.cancelQueued;
+    this.cancelQueued = false;
+    return v;
   }
 }

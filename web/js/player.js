@@ -16,8 +16,9 @@ const MODEL_VARIANTS = {
   hunyuan100k: { file: './models/hunyuan-prince-100k.glb', yaw: 0 }, // 混元 Pro 10 万面轻量版（14MB）
   triposr: { file: './models/little-prince.glb', yaw: Math.PI / 2 },
 };
+// TODO: AccuRIG 绑骨产出 prince_rigged.glb 后，默认切回 'rigged'
 const qsModel = new URLSearchParams(location.search).get('model');
-const MODEL_VARIANT = MODEL_VARIANTS[qsModel] ? qsModel : 'rigged';
+const MODEL_VARIANT = MODEL_VARIANTS[qsModel] ? qsModel : 'hunyuan';
 const { file: MODEL_URL, yaw: MODEL_YAW, animated: MODEL_ANIMATED } = MODEL_VARIANTS[MODEL_VARIANT];
 const MODEL_FALLBACK = MODEL_VARIANTS.hunyuan100k; // 绑骨版没产出时回退
 const MODEL_HEIGHT = 1.1;   // 比例约定：角色高 1.1 单位
@@ -81,11 +82,17 @@ function normalizeModel(obj) {
 }
 
 export class Player {
-  constructor(scene, radius, spawnLat = 0, spawnLon = 0) {
-    this.radius = radius;
-    const dir = latLonToDir(spawnLat, spawnLon);
-    this.pos = new THREE.Vector3(dir.x, dir.y, dir.z).multiplyScalar(radius);
+  /**
+   * @param {THREE.Scene} scene
+   * @param {{ center: THREE.Vector3, radius: number, spawn: {lat:number, lon:number, face?:{lat:number,lon:number}} }} world
+   */
+  constructor(scene, world) {
+    this.center = world.center.clone();
+    this.radius = world.radius;
+    const dir = latLonToDir(world.spawn.lat, world.spawn.lon);
+    this.pos = new THREE.Vector3(dir.x, dir.y, dir.z).multiplyScalar(this.radius);
     this.forward = new THREE.Vector3(0, 0, 1); // 切向朝向，首帧会投影到切平面
+    if (world.spawn.face) this.faceToward(world.spawn.face);
     this.height = 0;   // 离地高度（沿 up 方向）
     this.vSpeed = 0;   // 竖直（径向）速度
     this.mesh = buildPrince(); // 占位，GLB 就绪后替换
@@ -96,6 +103,41 @@ export class Player {
     this.speedNow = 0;
     this.loadModel(MODEL_URL, MODEL_ANIMATED, MODEL_FALLBACK);
     this.syncMesh();
+  }
+
+  /* 让朝向指向球面另一经纬度点（取大圆切向），供出生点/传送使用 */
+  faceToward(latLon) {
+    const spawnN = this.pos.clone().normalize();
+    const d = latLonToDir(latLon.lat, latLon.lon);
+    const target = new THREE.Vector3(d.x, d.y, d.z);
+    const f = target.addScaledVector(spawnN, -target.dot(spawnN));
+    if (f.lengthSq() > 1e-10) this.forward.copy(f.normalize());
+  }
+
+  /* 切换到另一个星球：换球心/半径，落到 spawn 径向 height 处（过场动画从高处落下） */
+  travelTo(world, height = 0) {
+    this.center.copy(world.center);
+    this.radius = world.radius;
+    const dir = latLonToDir(world.spawn.lat, world.spawn.lon);
+    this.pos.set(dir.x, dir.y, dir.z).multiplyScalar(this.radius);
+    this.forward.set(0, 0, 1);
+    if (world.spawn.face) this.faceToward(world.spawn.face);
+    this.vSpeed = 0;
+    this.height = height;
+    this.syncMesh();
+  }
+
+  /* 过场期间只播 idle 动画并同步模型，不走移动/重力 */
+  tickTravel(dt, height) {
+    this.height = height;
+    this.speedNow = 0;
+    this.updateAnim(dt);
+    this.syncMesh();
+  }
+
+  /* 世界坐标（球心 + 本地径向位置） */
+  get worldPos() {
+    return this.center.clone().add(this.pos.clone().normalize().multiplyScalar(this.radius + this.height));
   }
 
   /* 加载角色 GLB；animated=true 时建立 AnimationMixer，失败回退静态模型 */
@@ -186,6 +228,7 @@ export class Player {
     const xAxis = new THREE.Vector3().crossVectors(up, f); // 右 = up × forward
     const m = new THREE.Matrix4().makeBasis(xAxis, up, f);
     this.mesh.quaternion.setFromRotationMatrix(m);
-    this.mesh.position.copy(up).multiplyScalar(this.radius + this.height);
+    this.mesh.position.copy(this.center)
+      .addScaledVector(up, this.radius + this.height);
   }
 }

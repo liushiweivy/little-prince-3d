@@ -5,6 +5,10 @@ __pycache__/
 python-path.txt
 # 生成的 3D 资产与构建产物
 assets/gen/
+# GLB 源档（与 web/models 重复，单档 40MB 不入库）
+assets/models/
+# Pollinations 原始下载图（参考图以 assets/input/hunyuan-*-input.png 为准）
+assets/input/_raw/
 # 腾讯云密钥（本地独享，绝不入库）
 tools/hunyuan.local.json
 unity/Library/
