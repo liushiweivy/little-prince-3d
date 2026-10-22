@@ -4,13 +4,16 @@
 import * as THREE from '../vendor/three.module.min.js';
 import { GLTFLoader } from '../vendor/loaders/GLTFLoader.js';
 import { latLonToDir } from './sphere-math.js';
+import { assetPath } from './assets.js';
 
 const UP_Y = new THREE.Vector3(0, 1, 0);
 const gltfLoader = new GLTFLoader();
 
 const modelVariant = new URLSearchParams(location.search).get('model') === 'triposr'
   ? 'triposr' : 'hunyuan';
-const ROSE_FILE = modelVariant === 'triposr' ? './models/rose.glb' : './models/hunyuan-rose.glb';
+// 混元版玫瑰自带玻璃钟罩与底座（一体模型）；triposr 旧玫瑰仍配程序半球
+const ROSE_FILE = modelVariant === 'triposr' ? './models/rose.glb' : './models/hunyuan-glass-dome.glb';
+const ROSE_NEEDS_DOME = modelVariant === 'triposr';
 const FOX_FILE = modelVariant === 'triposr' ? './models/fox.glb' : './models/hunyuan-fox.glb';
 const ROSE_YAW = modelVariant === 'triposr' ? 0 : 0;
 const FOX_YAW = modelVariant === 'triposr' ? -Math.PI / 2 : 0;
@@ -25,8 +28,14 @@ export const WORLD_DEFS = [
     pad: { lat: -16, lon: 150 },
     spawn: { lat: -16, lon: 150, face: { lat: 8, lon: 10 } },
     npcs: [
-      { model: ROSE_FILE, yaw: ROSE_YAW, lat: 8, lon: 10, height: 0.62, label: '玫瑰', dome: true, dialogue: 'rose' },
-      { model: FOX_FILE, yaw: FOX_YAW, lat: 2, lon: -14, height: 0.72, label: '狐狸', dialogue: 'fox' },
+      { model: ROSE_FILE, yaw: ROSE_YAW, lat: 8, lon: 10, height: 0.9, label: '玫瑰', dome: ROSE_NEEDS_DOME, dialogue: 'rose' },
+    ],
+    props: [
+      { model: './models/hunyuan-volcano-active.glb', height: 1.8, lat: -45, lon: 60, sink: 0.18, glow: 0xff5a1f },
+      { model: './models/hunyuan-volcano-extinct.glb', height: 1.6, lat: -60, lon: 92, sink: 0.15 },
+      { model: './models/hunyuan-baobab.glb', height: 2.4, lat: 40, lon: 120, sink: 0.06 },
+      { model: './models/hunyuan-chair.glb', height: 0.9, lat: 24, lon: 66, yaw: 0.6 },          // 挪椅子看日落
+      { model: './models/hunyuan-sheep-box.glb', height: 0.5, lat: -2, lon: 42, yaw: 0.3 },        // 画着羊的箱子
     ],
   },
   {
@@ -37,6 +46,10 @@ export const WORLD_DEFS = [
     pad: { lat: -18, lon: 10 },
     spawn: { lat: -18, lon: 10, face: { lat: 18, lon: 0 } },
     npcs: [{ model: './models/hunyuan-king.glb', yaw: 0, lat: 18, lon: 0, height: 1.0, label: '国王', dialogue: 'king' }],
+    props: [
+      { model: './models/hunyuan-throne.glb', height: 1.5, lat: 27, lon: 2, face: 'spawn' },
+      { model: './models/hunyuan-fountain.glb', height: 1.0, lat: 2, lon: -18, sink: 0.05 }, // 王宫庭院喷泉
+    ],
   },
   {
     id: 'vainman', num: '326', name: '326 号行星 · 爱虚荣的人',
@@ -55,6 +68,10 @@ export const WORLD_DEFS = [
     pad: { lat: -18, lon: 10 },
     spawn: { lat: -18, lon: 10, face: { lat: 18, lon: 0 } },
     npcs: [{ model: './models/hunyuan-drunkard.glb', yaw: 0, lat: 18, lon: 0, height: 0.82, label: '酒鬼', dialogue: 'drunkard' }],
+    props: [
+      { model: './models/hunyuan-grapes.glb', height: 0.8, lat: 9, lon: -26, yaw: 1.2 }, // 葡萄→酒
+      // 酒瓶空缺：2026-10-22 新生成的 hunyuan-wine-bottle.glb 是"底板浮雕瓶"（白瓶白底被理解成展示牌），未摆放，待换参考图重生成
+    ],
   },
   {
     id: 'merchant', num: '328', name: '328 号行星 · 商人',
@@ -73,6 +90,9 @@ export const WORLD_DEFS = [
     pad: { lat: -22, lon: 8 },
     spawn: { lat: -22, lon: 8, face: { lat: 16, lon: 0 } },
     npcs: [{ model: './models/hunyuan-lamplighter.glb', yaw: 0, lat: 16, lon: 0, height: 0.92, label: '点灯人', dialogue: 'lamplighter' }],
+    props: [
+      { model: './models/hunyuan-streetlamp.glb', height: 2.1, lat: 9, lon: -16 },
+    ],
   },
   {
     id: 'geographer', num: '330', name: '330 号行星 · 地理学家',
@@ -82,6 +102,10 @@ export const WORLD_DEFS = [
     pad: { lat: -18, lon: 10 },
     spawn: { lat: -18, lon: 10, face: { lat: 18, lon: 0 } },
     npcs: [{ model: './models/hunyuan-geographer.glb', yaw: 0, lat: 18, lon: 0, height: 1.05, label: '地理学家', dialogue: 'geographer' }],
+    props: [
+      { model: './models/hunyuan-globe.glb', height: 0.85, lat: 10, lon: -22, yaw: 0.4 },
+      { model: './models/hunyuan-giant-book.glb', height: 0.95, lat: 4, lon: 20, yaw: -0.5 },
+    ],
   },
   {
     id: 'earth', num: '地球', name: '地球 · 撒哈拉沙漠',
@@ -93,7 +117,15 @@ export const WORLD_DEFS = [
     npcs: [
       { model: './models/hunyuan-pilot.glb', yaw: 0, lat: 12, lon: -140, height: 1.0, label: '飞行员', dialogue: 'pilot' },
       { model: './models/hunyuan-snake.glb', yaw: 0, lat: -8, lon: 40, height: 0.6, label: '蛇', dialogue: 'snake' },
+      // 狐狸在地球的麦田（原著：穿越沙漠后在麦田相遇）
+      { model: FOX_FILE, yaw: FOX_YAW, lat: 24, lon: -66, height: 0.72, label: '狐狸', dialogue: 'fox' },
     ],
+    props: [
+      { model: './models/hunyuan-plane-wreck.glb', height: 1.9, lat: -6, lon: -148, yaw: 0.8 }, // 坠机点
+      { model: './models/hunyuan-well.glb', height: 1.2, lat: 20, lon: -155 }, // 沙漠水井（原著结局）
+      { model: './models/hunyuan-wooden-bench.glb', height: 0.9, lat: 22, lon: -54, face: { lat: 24, lon: -66 }, yaw: Math.PI }, // 麦海边的长椅（模型 +Z 朝靠背，转 180° 面朝狐狸）
+    ],
+    wheat: { lat: 24, lon: -66 },
   },
 ];
 
@@ -135,8 +167,10 @@ function makeFacingAnchor(radius, lat, lon, faceLatLon, sink = 0.02) {
   return g;
 }
 
-/* GLB 归一化：XZ 居中、底贴 y=0、高 = targetHeight、偏航 yaw */
+/* GLB 归一化：先偏航再量盒（旋转绕自身原点，否则非对称模型会被居中偏移带离锚点）、
+ * XZ 居中、底贴 y=0、高 = targetHeight */
 function normalizeProp(obj, targetHeight, yaw = 0) {
+  obj.rotation.y = yaw;
   const box = new THREE.Box3().setFromObject(obj);
   const size = box.getSize(new THREE.Vector3());
   const center = box.getCenter(new THREE.Vector3());
@@ -144,13 +178,13 @@ function normalizeProp(obj, targetHeight, yaw = 0) {
   const wrap = new THREE.Group();
   obj.position.set(-center.x * s, -box.min.y * s, -center.z * s);
   obj.scale.setScalar(s);
-  obj.rotation.y = yaw;
   wrap.add(obj);
   return wrap;
 }
 
 function makeGround(radius, palette) {
-  const geo = new THREE.IcosahedronGeometry(radius, 6);
+  // detail 5：20480 三角面/星（detail 6 是 81920），flatShading 风格下肉眼无差
+  const geo = new THREE.IcosahedronGeometry(radius, 5);
   const posAttr = geo.getAttribute('position');
   const colors = new Float32Array(posAttr.count * 3);
   const base = new THREE.Color(palette.base);
@@ -315,32 +349,6 @@ function makeBaobab() {
   return g;
 }
 
-function makeVolcano(active) {
-  const g = new THREE.Group();
-  const cone = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.28, 1.0, 1.2, 9),
-    new THREE.MeshStandardMaterial({ color: 0x8a8078, roughness: 1, flatShading: true })
-  );
-  cone.position.y = 0.6;
-  g.add(cone);
-  const crater = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.24, 0.24, 0.12, 9),
-    new THREE.MeshStandardMaterial({
-      color: 0x2b2320,
-      emissive: active ? 0xff5a1f : 0x000000,
-      emissiveIntensity: active ? 0.9 : 0,
-    })
-  );
-  crater.position.y = 1.2;
-  g.add(crater);
-  if (active) {
-    const glow = new THREE.PointLight(0xff7a33, 6, 9);
-    glow.position.y = 1.6;
-    g.add(glow);
-  }
-  return g;
-}
-
 function makeRock(scaleF = 1) {
   return new THREE.Mesh(
     new THREE.DodecahedronGeometry(0.3 * scaleF, 0),
@@ -362,6 +370,41 @@ function makeCactus(scaleF = 1) {
   }
   g.scale.setScalar(scaleF);
   return g;
+}
+
+/* 金色麦田：环绕狐狸的一片麦穗（地球专属，对应"麦田本来与我无关"） */
+function makeWheat(radius, centerLat, centerLon) {
+  const COUNT = 70;
+  const geo = new THREE.ConeGeometry(0.045, 1, 4);
+  geo.translate(0, 0.5, 0);
+  const mat = new THREE.MeshStandardMaterial({ color: 0xd9b44a, roughness: 0.9, flatShading: true });
+  const mesh = new THREE.InstancedMesh(geo, mat, COUNT);
+  const center = latLonToDirVec(centerLat, centerLon);
+  const north = new THREE.Vector3(0, 1, 0).addScaledVector(center, -center.y).normalize();
+  const east = new THREE.Vector3().crossVectors(center, north).normalize();
+  const rnd = mulberry32(7701);
+  const dummy = new THREE.Object3D();
+  const tilt = new THREE.Quaternion();
+  let placed = 0;
+  while (placed < COUNT) {
+    // 切平面高斯散布 → 投回球面方向
+    const a = rnd() * Math.PI * 2;
+    const r = Math.pow(rnd(), 0.6) * 2.0;
+    const dir = center.clone()
+      .addScaledVector(north, Math.cos(a) * r / radius)
+      .addScaledVector(east, Math.sin(a) * r / radius).normalize();
+    if (dir.angleTo(center) < 0.11) continue; // 狐狸脚下留空
+    const h = 0.32 + rnd() * 0.26;
+    dummy.position.copy(dir).multiplyScalar(radius + 0.01);
+    dummy.quaternion.setFromUnitVectors(UP_Y, dir);
+    tilt.setFromEuler(new THREE.Euler((rnd() - 0.5) * 0.35, 0, (rnd() - 0.5) * 0.35));
+    dummy.quaternion.multiply(tilt);
+    dummy.scale.set(0.8 + rnd() * 0.5, h, 0.8 + rnd() * 0.5);
+    dummy.updateMatrix();
+    mesh.setMatrixAt(placed++, dummy.matrix);
+  }
+  mesh.instanceMatrix.needsUpdate = true;
+  return mesh;
 }
 
 function makeStars() {
@@ -405,6 +448,10 @@ function buildDecor(def, group) {
   }));
   // 出发台也留空
   exclude.push({ dir: latLonToDirVec(def.pad.lat, def.pad.lon), angle: 0.35 });
+  // 混元道具周围同样留空
+  for (const p of def.props ?? []) {
+    exclude.push({ dir: latLonToDirVec(p.lat, p.lon), angle: Math.max(0.22, (p.height ?? 1) / R * 0.7) });
+  }
 
   if (def.grass) group.add(makeGrass(R, def.grass, def.id.length * 131 + 3, exclude));
   if (def.flowers) group.add(makeFlowers(R, def.flowers, def.id.length * 211 + 9, exclude));
@@ -427,16 +474,118 @@ function buildDecor(def, group) {
   }
 
   if (def.id === 'b612') {
-    group.add(placeOnSphere(makeBaobab(), R, 40, 120, 0.05));
+    // 活/死火山与大猴面包树均已换成混元 GLB（见 def.props），这里只留两棵程序化小树
     group.add(placeOnSphere(makeBaobab(), R, -30, 200, 0.05));
     group.add(placeOnSphere(makeBaobab(), R, 60, 300, 0.05));
-    group.add(placeOnSphere(makeVolcano(true), R, -45, 60, 0.1));
-    group.add(placeOnSphere(makeVolcano(false), R, -52, 75, 0.1));
   }
   if (def.id === 'earth') {
     for (const [la, lo, s] of [[20, 40, 1.1], [-26, -40, 0.9], [34, -90, 1.3], [-4, 70, 0.8]]) {
       group.add(placeOnSphere(makeCactus(s), R, la, lo, 0.04));
     }
+    if (def.wheat) group.add(makeWheat(R, def.wheat.lat, def.wheat.lon));
+  }
+}
+
+/* 混元道具（无名字牌）：只建静态锚点，GLB 由 enterWorld 按需加载。
+ * face='spawn' 时面向出生点，glow 时在道具上方加点光（光属静态层） */
+function buildPropAnchors(def, group, slots) {
+  for (const p of def.props ?? []) {
+    const sink = p.sink ?? 0.02;
+    const anchor = p.face
+      ? makeFacingAnchor(def.radius, p.lat, p.lon, p.face === 'spawn' ? def.spawn : p.face, sink)
+      : placeOnSphere(new THREE.Group(), def.radius, p.lat, p.lon, sink);
+    anchor.name = `prop:${p.model.split('/').pop()}`;
+    if (p.glow) {
+      const light = new THREE.PointLight(p.glow, 5, 9);
+      light.position.y = p.height * 0.75;
+      anchor.add(light);
+    }
+    group.add(anchor);
+    slots.push({ anchor, model: p.model, height: p.height, yaw: p.yaw ?? 0, wrap: null });
+  }
+}
+
+/* GLB 异步到位后的弹入动画（main 循环每帧 tickReveals） */
+const revealAnims = [];
+function startReveal(obj, dur = 0.45) {
+  obj.scale.setScalar(0.55);
+  revealAnims.push({ obj, t: 0, dur });
+}
+export function tickReveals(dt) {
+  for (let i = revealAnims.length - 1; i >= 0; i--) {
+    const r = revealAnims[i];
+    if (!r.obj.parent) { // 已被 exitWorld 卸载
+      revealAnims.splice(i, 1);
+      continue;
+    }
+    r.t += dt;
+    const k = Math.min(r.t / r.dur, 1);
+    const e = 1 - Math.pow(1 - k, 3); // ease-out cubic
+    r.obj.scale.setScalar(0.55 + 0.45 * e);
+    if (k >= 1) revealAnims.splice(i, 1);
+  }
+}
+
+/* 释放一棵 GLB 子树的 GPU 资源（Set 去重：MR 贴图同挂 metalness/roughness 两槽） */
+function disposeObject(root) {
+  const geos = new Set();
+  const mats = new Set();
+  root.traverse((o) => {
+    if (o.geometry) geos.add(o.geometry);
+    if (Array.isArray(o.material)) o.material.forEach((m) => mats.add(m));
+    else if (o.material) mats.add(o.material);
+  });
+  const texs = new Set();
+  for (const mat of mats) {
+    for (const key in mat) {
+      const v = mat[key];
+      if (v && v.isTexture) texs.add(v);
+    }
+  }
+  geos.forEach((g) => g.dispose());
+  texs.forEach((t) => t.dispose());
+  mats.forEach((m) => m.dispose());
+}
+
+/* 进入星球：按需拉取该星 NPC/道具 GLB。
+ * gen 作废在途请求（快速横跳时旧结果到达即 dispose，绝不挂载/泄漏）。
+ * 静态层（地面/草/出发台/名字牌/锚点）启动时已建好且全程保留——
+ * 远景悬浮的小行星与光柱本来就是旅行时的可见景观。 */
+export function enterWorld(world) {
+  world.gen += 1;
+  const gen = world.gen;
+  const jobs = world.slots.map(async (slot) => {
+    let gltf;
+    try {
+      gltf = await gltfLoader.loadAsync(assetPath(slot.model));
+    } catch (e) {
+      if (gen === world.gen) console.warn(`${slot.model} 加载失败`, e);
+      return; // 锚点/名字牌仍在，不黑屏不抛
+    }
+    if (gen !== world.gen) {
+      disposeObject(gltf.scene); // 迟到的回复：世界已离开，立即释放
+      return;
+    }
+    const wrap = normalizeProp(gltf.scene, slot.height, slot.yaw);
+    slot.anchor.add(wrap);
+    slot.wrap = wrap;
+    startReveal(wrap);
+  });
+  world.loadReady = Promise.allSettled(jobs).then(() => {}); // 恒 resolve，防止黑屏死等
+  return world.loadReady;
+}
+
+/* 离开星球：卸载全部 GLB wrap，静态层保留 */
+export function exitWorld(world) {
+  world.gen += 1; // 在途 loadAsync 的回调到达时一律走"迟到"分支
+  for (const slot of world.slots) {
+    if (!slot.wrap) continue;
+    slot.wrap.removeFromParent();
+    disposeObject(slot.wrap);
+    slot.wrap = null;
+  }
+  for (let i = revealAnims.length - 1; i >= 0; i--) {
+    if (!revealAnims[i].obj.parent) revealAnims.splice(i, 1);
   }
 }
 
@@ -448,19 +597,23 @@ function buildWorld(scene, def) {
   group.add(ground);
   buildDecor(def, group);
 
-  // NPC（异步 GLB）+ 名字牌，一律面向本星出生点（玩家来路）
+  // 动态层槽位：锚点/灯光/名字牌属静态层（启动即建、常驻），
+  // GLB wrap 由 enterWorld/exitWorld 按需挂载与释放
+  const slots = [];
+  buildPropAnchors(def, group, slots);
+
+  // NPC 锚点 + 名字牌，一律面向本星出生点（玩家来路）
   const npcRuntimes = [];
   for (const npc of def.npcs) {
     const anchor = makeFacingAnchor(def.radius, npc.lat, npc.lon, def.spawn);
-    gltfLoader.load(npc.model, (gltf) => {
-      anchor.add(normalizeProp(gltf.scene, npc.height, npc.yaw));
-    }, undefined, (e) => console.warn(`${npc.model} 加载失败`, e));
+    anchor.name = `npc:${npc.model.split('/').pop()}`;
     if (npc.dome) anchor.add(makeRoseDome());
     const label = makeLabel(npc.label);
     label.position.y = npc.height + 0.55;
     anchor.add(label);
     group.add(anchor);
     npcRuntimes.push({ key: npc.dialogue, label: npc.label, anchor });
+    slots.push({ anchor, model: npc.model, height: npc.height, yaw: npc.yaw, wrap: null });
   }
 
   // 出发台
@@ -475,6 +628,9 @@ function buildWorld(scene, def) {
     center,
     ground,
     npcs: npcRuntimes,
+    slots,
+    gen: 0,
+    loadReady: Promise.resolve(),
     padLocal: dirToLocal(def.radius, def.pad.lat, def.pad.lon),
     padWorld: center.clone().add(dirToLocal(def.radius, def.pad.lat, def.pad.lon)),
   };

@@ -1,6 +1,6 @@
 /* 入口：渲染器、多星球装配、星图旅行、主循环 */
 import * as THREE from '../vendor/three.module.min.js';
-import { createWorlds } from './worlds.js';
+import { createWorlds, tickReveals, enterWorld, exitWorld } from './worlds.js';
 import { Player } from './player.js';
 import { FollowCamera } from './follow-camera.js?v=5';
 import { Input } from './controls.js?v=2';
@@ -24,6 +24,9 @@ const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerH
 
 const { list: worlds, byId } = createWorlds(scene);
 let current = byId.get('b612');
+
+// 动态 GLB 按星球懒加载：开局载入 B-612，旅行时载目标、离开即释放
+enterWorld(current);
 
 const player = new Player(scene, {
   center: current.center,
@@ -90,8 +93,8 @@ function startDialogue(npc) {
   dialogue.start(npc);
 }
 
-/* 旅行过场：淡出 → 换星球（从高处出现）→ 淡入 + 落下 */
-const travel = { active: false, phase: null, t: 0, target: null };
+/* 旅行过场：淡出 → 目标星 GLB 载入完成后换星球（从高处出现）→ 淡入 + 落下 */
+const travel = { active: false, phase: null, t: 0, target: null, ready: false };
 function startTravel(world) {
   if (travel.active || world === current) return;
   clearMoveTarget();
@@ -100,17 +103,24 @@ function startTravel(world) {
   travel.phase = 'out';
   travel.t = 0;
   travel.target = world;
+  travel.ready = false;
   fadeEl.style.opacity = '1';
+  // 黑屏期预载目标星；本机 lite 模型通常 1s 内齐，未齐就保持全黑等待
+  enterWorld(world).then(() => { travel.ready = true; });
 }
 function arriveOn(world) {
+  const old = current;
   current = world;
   travel.phase = 'descend'; // 先切阶段，避免后续异常导致每帧重复进场
   travel.t = 0;
+  // 落点环标先从旧星球摘下，防止 exitWorld 后成为孤儿
+  moveMarker.parent?.remove(moveMarker);
   player.travelTo({ center: world.center, radius: world.def.radius, spawn: world.def.spawn }, START_HEIGHT);
   followCam.setRadius(world.def.radius);
   followCam.snapped = false; // 相机立刻贴到新落点身后，下帧起跟随下落
   planetNameEl.innerHTML = `小王子 <span>·</span> ${world.def.name}`;
   fadeEl.style.opacity = '0';
+  exitWorld(old); // 旧星 GLB 释放（地面/光柱等静态景观保留）
 }
 
 window.addEventListener('resize', () => {
@@ -121,7 +131,8 @@ window.addEventListener('resize', () => {
 
 // 调试钩子：控制台 __debug.teleport(lat, lon) / __debug.go('king')
 window.__debug = {
-  player, worlds, camera,
+  player, worlds, camera, input,
+  get frame() { return frame; }, // rAF 被后台节流时可手动步进主循环（测试用）
   get followCam() { return followCam; },
   get moveTarget() { return moveTarget ? moveTarget.toArray() : null; },
   groundPick(ndcX, ndcY) {
@@ -215,7 +226,7 @@ function frame() {
 
   if (travel.active) {
     travel.t += dt;
-    if (travel.phase === 'out' && travel.t >= FADE_OUT) {
+    if (travel.phase === 'out' && travel.t >= FADE_OUT && travel.ready) {
       arriveOn(travel.target);
     } else if (travel.phase === 'descend') {
       const k = Math.min(travel.t / DESCEND, 1);
@@ -306,6 +317,9 @@ function frame() {
   if (moveMarker.visible) {
     moveMarker.scale.setScalar(1 + 0.1 * Math.sin(elapsed * 5));
   }
+
+  // NPC/道具 GLB 异步到位后的弹入动画
+  tickReveals(dt);
 
   // 鼠标拖拽环绕 / 滚轮缩放（任何状态下都可用，星图遮罩本身会拦截指针）
   const drag = input.takeDrag();
