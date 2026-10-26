@@ -24,3 +24,7 @@ unity/Library/
 unity/Temp/
 unity/Obj/
 unity/Build/
+
+# 2026-10-26 错档重生成下载暂存（入位后无需留库）
+assets/input/_rejob/
+web/_plush_tmp/

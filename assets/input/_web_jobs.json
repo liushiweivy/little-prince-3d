@@ -1,33 +1,167 @@
 {
-  "channel": "web-v3.1-500k",
-  "submitted": "2026-10-22",
-  "points": "20 free/day, 1 point per 500k job; 8 characters + 12 prop points = 20, balance 0",
-  "character_jobs": {
-    "pilot":        { "id": "6bdc1111-a6c4-48a4-8959-b5ae96859c08", "status": "done", "bytes": 44356492 },
-    "vainman":      { "id": "18eb5d58-2dff-43da-a7a7-094a4701e725", "status": "done", "bytes": 41765860 },
-    "drunkard":     { "id": "ceef8c05-5c5b-4b11-b706-319abe7468ac", "status": "done", "bytes": 40188404 },
-    "snake":        { "id": "077e4c7f-049b-4e71-9310-8e50efa02877", "status": "done", "bytes": 43306656 },
-    "lamplighter":  { "id": "bb0c5e64-a1e7-489e-ac9b-7d57dfc629f1", "status": "done", "bytes": 47949080 },
-    "king":         { "id": "b325e66d-8dd5-4b65-8b8d-b68abe329e29", "status": "done", "bytes": 50312048 },
-    "merchant":     { "id": "4e4124eb-73f4-4283-b059-4e055664ab96", "status": "done", "bytes": 39699780 },
-    "geographer":   { "id": "600b374b-0afc-4df9-9876-9aca6e3c007e", "status": "done", "bytes": 44553172 }
+ "channel": "web-v3.1-500k",
+ "submitted": "2026-10-22",
+ "points": "20 free/day, 1 point per 500k job; 8 characters + 12 prop points = 20, balance 0",
+ "character_jobs": {
+  "pilot": {
+   "id": "6bdc1111-a6c4-48a4-8959-b5ae96859c08",
+   "status": "done",
+   "bytes": 44356492
   },
-  "prop_jobs": {
-    "volcano-active":  { "id": "b4b12107-1d5f-43ba-9afb-80013489df78", "status": "done", "bytes": 45472132 },
-    "volcano-extinct": { "id": "b50ec6a7-7f57-4bec-8c73-95297bb41544", "status": "signed-url-broken", "bytes": null, "note": "glb/obj/mtl permanent 403 SignatureDoesNotMatch (page viewer also 403); geometryGlb downloadable but untextured (assets/models/_geom-volcano-extinct.glb, 9.0MB); resubmit on next quota day" },
-    "baobab":          { "id": "3dfd7adf-56c9-4617-8eda-a8f7b57dbe0a", "status": "done", "bytes": 40835264 },
-    "throne":          { "id": "5bd18dda-fcb3-4018-bb03-601aa67d3ec7", "status": "done", "bytes": 49703940 },
-    "streetlamp-v1":   { "id": "46c98b28-ef24-4f6b-ad7d-03808bbec787", "status": "signed-url-broken", "bytes": null, "note": "same permanent 403; resubmitted as streetlamp job 4960cb5f" },
-    "globe":           { "id": "94fcd18c-9d56-4198-9f2f-7a193cbc7f1a", "status": "done", "bytes": 47105864 },
-    "giant-book":      { "id": "cd9f9e04-93ca-401c-adfa-ed06a8c20ec5", "status": "done", "bytes": 40729572 },
-    "plane-wreck":     { "id": "e9164e08-fe51-42c1-9e05-9566f36769bd", "status": "done", "bytes": 39158048 },
-    "chair":           { "id": "45f84d56-d516-447a-965b-87aa1f9b8dba", "status": "done", "bytes": 38836112, "note": "freshly re-signed detail URL needed ~20min after success; first signed URLs 403ed transiently" },
-    "sheep-box":       { "id": "21a96f24-ab92-4009-85a2-d6f6ad25d70d", "status": "done", "bytes": 41134184 },
-    "streetlamp":      { "id": "4960cb5f-4bbc-4038-aaa8-bd68caa85257", "status": "done", "bytes": 37852756, "note": "resubmit of v1; model has a second low lantern at the base" },
-    "grapes":          { "id": "aceb6be3-e9a9-4354-a960-db161f8d7f8d", "status": "done", "bytes": 40971252 }
+  "vainman": {
+   "id": "18eb5d58-2dff-43da-a7a7-094a4701e725",
+   "status": "done",
+   "bytes": 41765860
   },
-  "qa": "props: ~270k-282k verts, ymin=0, PBR baseColorTexture, unit extents 0.5-1.1 (game loader normalizes); official render contact sheet assets/input/_previews/_props_all10_sheet.png; characters face +Z",
-  "prop_artifacts": "volcano-active has a dark fin-like shard at back rim; plane-wreck is intact not crashed; sheep-box is open-top crate with 3 holes on side; streetlamp has extra base lantern; baobab has tiny white cube artifact in canopy",
-  "download_notes": "COS signed URLs: some jobs serve permanent 403 on glb/obj while geometryGlb works grey-only; others 403 transiently right after success then work via a FRESH /creations/detail re-sign within minutes — always re-fetch detail and curl --noproxy '*' immediately. Hunyuan image_url PNGs are transparent — composite on white for contact sheets.",
-  "known_quirks": "vainman lost mini top hat and hand mirror; merchant prop reads more like a cup than a ledger; drunkard suit tinted wine-red; king scepter lost but right hand got a scroll-like shape"
+  "drunkard": {
+   "id": "ceef8c05-5c5b-4b11-b706-319abe7468ac",
+   "status": "done",
+   "bytes": 40188404
+  },
+  "snake": {
+   "id": "077e4c7f-049b-4e71-9310-8e50efa02877",
+   "status": "done",
+   "bytes": 43306656
+  },
+  "lamplighter": {
+   "id": "bb0c5e64-a1e7-489e-ac9b-7d57dfc629f1",
+   "status": "done",
+   "bytes": 47949080
+  },
+  "king": {
+   "id": "b325e66d-8dd5-4b65-8b8d-b68abe329e29",
+   "status": "done",
+   "bytes": 50312048
+  },
+  "merchant": {
+   "id": "4e4124eb-73f4-4283-b059-4e055664ab96",
+   "status": "done",
+   "bytes": 39699780
+  },
+  "geographer": {
+   "id": "600b374b-0afc-4df9-9876-9aca6e3c007e",
+   "status": "done",
+   "bytes": 44553172
+  }
+ },
+ "prop_jobs": {
+  "volcano-active": {
+   "id": "b4b12107-1d5f-43ba-9afb-80013489df78",
+   "status": "done",
+   "bytes": 45472132
+  },
+  "volcano-extinct": {
+   "id": "3d12c8bf-cddf-11f1-8319-32f6c13eda4a",
+   "status": "done",
+   "bytes": 47105864,
+   "note": "覆雪火山完整 PBR；原 b50ec6a7-7f57-4bec-8c73-95297bb41544 签名坏，此为旧号另一版成功产物，2026-10-22 UI 可下"
+  },
+  "baobab": {
+   "id": "3dfd7adf-56c9-4617-8eda-a8f7b57dbe0a",
+   "status": "done",
+   "bytes": 40835264
+  },
+  "throne": {
+   "id": "5bd18dda-fcb3-4018-bb03-601aa67d3ec7",
+   "status": "done",
+   "bytes": 49703940
+  },
+  "streetlamp-v1": {
+   "id": "46c98b28-ef24-4f6b-ad7d-03808bbec787",
+   "status": "signed-url-broken",
+   "bytes": null,
+   "note": "same permanent 403; resubmitted as streetlamp job 4960cb5f"
+  },
+  "globe": {
+   "id": "94fcd18c-9d56-4198-9f2f-7a193cbc7f1a",
+   "status": "done",
+   "bytes": 47105864
+  },
+  "giant-book": {
+   "id": "cd9f9e04-93ca-401c-adfa-ed06a8c20ec5",
+   "status": "done",
+   "bytes": 40729572
+  },
+  "plane-wreck": {
+   "id": "e9164e08-fe51-42c1-9e05-9566f36769bd",
+   "status": "done",
+   "bytes": 39158048
+  },
+  "chair": {
+   "id": "45f84d56-d516-447a-965b-87aa1f9b8dba",
+   "status": "done",
+   "bytes": 38836112,
+   "note": "freshly re-signed detail URL needed ~20min after success; first signed URLs 403ed transiently"
+  },
+  "sheep-box": {
+   "id": "21a96f24-ab92-4009-85a2-d6f6ad25d70d",
+   "status": "done",
+   "bytes": 41134184
+  },
+  "streetlamp": {
+   "id": "4960cb5f-4bbc-4038-aaa8-bd68caa85257",
+   "status": "done",
+   "bytes": 37852756,
+   "note": "resubmit of v1; model has a second low lantern at the base"
+  },
+  "grapes": {
+   "id": "aceb6be3-e9a9-4354-a960-db161f8d7f8d",
+   "status": "done",
+   "bytes": 40971252
+  },
+  "glass-dome": {
+   "id": "9525c656-cddf-11f1-8319-32f6c13eda4a",
+   "status": "done",
+   "bytes": 41134184,
+   "note": "罩+玫瑰+白座一体；旧号手工下载"
+  },
+  "well": {
+   "id": "e25f7906-cddf-11f1-8319-32f6c13eda4a",
+   "status": "done",
+   "bytes": 45094508,
+   "note": "木架辘轳井；旧号手工下载"
+  },
+  "wooden-bench": {
+   "id": "55ee4815-cddf-11f1-8319-32f6c13eda4a",
+   "status": "done",
+   "bytes": 38836112,
+   "note": "模型 +Z 朝靠背，摆放需 yaw PI；旧号手工下载"
+  },
+  "well-stone": {
+   "id": "29079440-cde0-11f1-8319-32f6c13eda4a",
+   "status": "done",
+   "bytes": 40971252,
+   "note": "石井备用未摆放；旧号手工下载"
+  },
+  "fountain": {
+   "id": "6db9ac35-cddf-11f1-8319-32f6c13eda4a",
+   "status": "done",
+   "bytes": 37852756,
+   "note": "多层石喷泉（曾误认酒瓶），摆 325；旧号手工下载"
+  },
+  "wine-bottle": {
+   "id": "7e2b12a3-3d29-4066-a988-510b80588713",
+   "status": "done",
+   "account": "折耳v",
+   "submitted": "2026-10-22T22:16",
+   "note": "红盖卡通白瓶+白底参考图；实际出模 1.5m 面 72MB（非预期 500k），模型是方形底板上的酒瓶浮雕/展示牌，不是独立酒瓶，未摆入游戏，待换参考图（非白底/3-4 视角）重生成",
+   "bytes": 72688724,
+   "faces": "1.5m",
+   "downloaded": "2026-10-22T22:31"
+  }
+ },
+ "qa": "props: ~270k-282k verts, ymin=0, PBR baseColorTexture, unit extents 0.5-1.1 (game loader normalizes); official render contact sheet assets/input/_previews/_props_all10_sheet.png; characters face +Z",
+ "prop_artifacts": "volcano-active has a dark fin-like shard at back rim; plane-wreck is intact not crashed; sheep-box is open-top crate with 3 holes on side; streetlamp has extra base lantern; baobab has tiny white cube artifact in canopy",
+ "download_notes": "COS signed URLs: some jobs serve permanent 403 on glb/obj while geometryGlb works grey-only; others 403 transiently right after success then work via a FRESH /creations/detail re-sign within minutes — always re-fetch detail and curl --noproxy '*' immediately. Hunyuan image_url PNGs are transparent — composite on white for contact sheets.",
+ "known_quirks": "vainman lost mini top hat and hand mirror; merchant prop reads more like a cup than a ledger; drunkard suit tinted wine-red; king scepter lost but right hand got a scroll-like shape",
+ "rejob_2026-10-26": {
+  "note": "错档 5 件重生成（MISSING_ASSETS.md 恢复步骤 6），500k 档已逐单验证",
+  "jobs": {
+   "glass-dome": "682d847c-bffa-4489-93ea-a9c776f1c93a",
+   "volcano-extinct": "68ad492b-56f6-4de5-86af-4fd68bfbcc6e",
+   "well": "976160af-db4f-4fa6-9acc-859bb41ab254",
+   "wooden-bench": "2d45fb75-3cd5-42db-8052-f26d8d12a48f",
+   "fountain-text3d": "e227ba0c-b788-474e-8ad4-617257b14d3f"
+  }
+ }
 }

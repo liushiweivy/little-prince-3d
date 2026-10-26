@@ -11,9 +11,10 @@ const gltfLoader = new GLTFLoader();
 
 const modelVariant = new URLSearchParams(location.search).get('model') === 'triposr'
   ? 'triposr' : 'hunyuan';
-// 混元版玫瑰自带玻璃钟罩与底座（一体模型）；triposr 旧玫瑰仍配程序半球
-const ROSE_FILE = modelVariant === 'triposr' ? './models/rose.glb' : './models/hunyuan-glass-dome.glb';
-const ROSE_NEEDS_DOME = modelVariant === 'triposr';
+// hunyuan-glass-dome.glb 错档已于 2026-10-26 重生成恢复（罩+玫瑰+木座一体，见 MISSING_ASSETS.md），
+// 但玫瑰位暂仍用单体玫瑰 hunyuan-rose.glb + 程序半球罩（一体件接入需重调 height/sink，待真机验收）
+const ROSE_FILE = modelVariant === 'triposr' ? './models/rose.glb' : './models/hunyuan-rose.glb';
+const ROSE_NEEDS_DOME = true;
 const FOX_FILE = modelVariant === 'triposr' ? './models/fox.glb' : './models/hunyuan-fox.glb';
 const ROSE_YAW = modelVariant === 'triposr' ? 0 : 0;
 const FOX_YAW = modelVariant === 'triposr' ? -Math.PI / 2 : 0;
